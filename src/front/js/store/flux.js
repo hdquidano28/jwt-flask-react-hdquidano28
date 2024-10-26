@@ -1,52 +1,100 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
-			message: null,
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
+			login: [],
+			signup: [],
+			logout: [],
+			token: null,
+			isAuthenticated: false
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
+			getLogin: async (email, password) => {
+				try {
+					// fetching data from the backend
+					const response = await fetch(`https://opulent-disco-69rg49pr7rj72xxx4-3001.app.github.dev/api/login`, {
+						method: "POST",
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
+						},
+						body: JSON.stringify({ email, password })
+					})
+
+					if (!response.ok) {
+						throw new Error("Response was not ok")
+					}
+
+					const data = await response.json();
+
+					if (data.token) {
+						setStore({ isAuthenticated: true, token: data.token, message: data.message })
+					} else {
+						throw new Error("Invalid login data")
+					}
+					// don't forget to return something, that is how the async resolves
+					return data;
+				} catch (error) {
+					console.log("Error loading message from backend", error);
+					return { error: error.message }
+				}
 			},
 
-			getMessage: async () => {
-				try{
+			getSignUp: async (email, password) => {
+				try {
 					// fetching data from the backend
-					const resp = await fetch(process.env.BACKEND_URL + "/api/hello")
-					const data = await resp.json()
+					const response = await fetch(`https://opulent-disco-69rg49pr7rj72xxx4-3001.app.github.dev/api/signup`, {
+						method: "POST",
+						headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': "*",
+						},
+						body: JSON.stringify({ email, password })
+					})
+
+					if (!response.ok) {
+						throw new Error("Response was not ok")
+					}
+					const data = await response.json();
 					setStore({ message: data.message })
 					// don't forget to return something, that is how the async resolves
 					return data;
-				}catch(error){
-					console.log("Error loading message from backend", error)
+				} catch (error) {
+					console.log("Error loading message from backend", error);
+					return { error: error.message }
 				}
 			},
-			changeColor: (index, color) => {
-				//get the store
+
+			login: async () => {
+				setStore({ isAuthenticated: true })
+			},
+
+			logout: async () => {
 				const store = getStore();
+				const token = store.token;
 
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
-				});
+				if (token) {
+					try {
+						const response = await fetch(`https://opulent-disco-69rg49pr7rj72xxx4-3001.app.github.dev/api/logout`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'Authorization': `Bearer ${token}` //Envia el token para autenticar solicitudes en el server.
+							}
+						});
+						if (!response.ok) {
+							throw new Error("Logout failed")
+						}
+						console.log("Token invalidate on backend")
+					} catch (error) {
+						console.log("Error during logout", error)
+					}
+				}
+				setStore({ isAuthenticated: false, token: null, message: "Logout successful" })
 
-				//reset the global store
-				setStore({ demo: demo });
-			}
+				console.log("Token removed, user logged out successfully");
+
+			},
 		}
 	};
 };
