@@ -19,8 +19,8 @@ export const LoginForm = () => {
         const result = await actions.getLogin(email, password);
         console.log(result)
 
-        if (result && result.error === "User not found") {
-            setAlertMessage("User not found.")
+        if (result && result.error === "User does not exists") {
+            setAlertMessage("User does not exists")
         } else if (result && result.message) {
             actions.login();
             console.log("Usuario autenticado");

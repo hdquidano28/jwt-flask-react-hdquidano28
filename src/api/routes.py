@@ -42,14 +42,17 @@ def signup_user():
     if user is not None:
         return jsonify({"error": "User already exists"}), 400
     
+    try:
     #Hash password and create user
-    body["password"] = bcrypt.generate_password_hash(body["password"]).decode("utf-8")
-    user=User(email=body["email"], password=body["password"], is_active=True)
+        body["password"] = bcrypt.generate_password_hash(body["password"]).decode("utf-8")
+        user=User(email=body["email"], password=body["password"], is_active=True)
 
-    db.session.add(user)
-    db.session.commit()
+        db.session.add(user)
+        db.session.commit()
 
-    return jsonify({"msg": "User created", "user":  user.serialize()})
+        return jsonify({"msg": "User created", "user":  user.serialize()})
+    except Exception as e:
+        return jsonify({'error':'User could not be created'}), 500
 
 @api.route("/login", methods=["POST"])
 def user_login():

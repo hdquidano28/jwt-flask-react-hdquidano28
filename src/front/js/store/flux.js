@@ -22,7 +22,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					})
 
 					if (!response.ok) {
-						throw new Error("Response was not ok")
+						throw new Error("User does not exists")
 					}
 
 					const data = await response.json();
@@ -53,7 +53,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					})
 
 					if (!response.ok) {
-						throw new Error("Response was not ok")
+						throw new Error("User already exists")
 					}
 					const data = await response.json();
 					setStore({ message: data.message })

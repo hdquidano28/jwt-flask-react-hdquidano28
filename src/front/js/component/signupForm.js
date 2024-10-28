@@ -27,8 +27,10 @@ export const SignUpForm = () => {
         if (result && result.msg === "User created") {
             setAlertMessage(null);
             navigate('/')
+        } else if (result.error === "User already exists") {
+            setAlertMessage("The user already exists")
         } else {
-            setAlertMessage("The user already exist")
+            setAlertMessage("User could not be created")
         }
     }
 
